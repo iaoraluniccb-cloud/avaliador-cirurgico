@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Avaliador Cirúrgico Odontológico — Oral Unic</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400&family=Cormorant:ital,wght@1,300&family=Josefin+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vinho:        #8B2D42;
+    --vinho-deep:   #6A1F30;
+    --vinho-light:  #B85C72;
+    --cobre:        #C4955A;
+    --marfim:       #FDF9F4;
+    --creme:        #F5EDE2;
+    --blush:        #EDDDD4;
+    --warm:         #E0C9B8;
+    --moka:         #3D2A20;
+    --tinta:        #1A0F0A;
+    --primary:      #8B2D42;
+    --primary-deep: #6A1F30;
+    --primary-light:#B85C72;
+    --accent:       #C4955A;
+    --bg:           #FDF9F4;
+    --bg-soft:      #F5EDE2;
+    --card:         #ffffff;
+    --border:       #E0C9B8;
+    --text:         #1A0F0A;
+    --text-muted:   #3D2A20;
+    --success:      #2d6a4f;
+    --warning:      #b5650d;
+    --danger:       #9b2226;
+    --radius:       10px;
+    --shadow:       0 2px 16px rgba(139,45,66,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Josefin Sans', 'Segoe UI', sans-serif;
+    font-weight: 300;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    letter-spacing: 0.03em;
+  }
+
+  header {
+    background: var(--vinho-deep);
+    color: var(--marfim);
+    padding: 0 32px;
+    display: flex;
+    align-items: stretch;
+    box-shadow: 0 2px 14px rgba(106,31,48,0.35);
+    min-height: 70px;
+  }
+
+  .header-accent {
+    width: 5px;
+    background: var(--cobre);
+    margin-right: 20px;
+    flex-shrink: 0;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    flex: 1;
+  }
+
+  header .logo {
+    width: 42px; height: 42px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(196,149,90,0.45);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.1rem;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--marfim);
+  }
+  header p {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 300;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--warm);
+    margin-top: 4px;
+  }
+
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 30px 20px 70px;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    padding: 26px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--vinho);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--blush);
+    padding-bottom: 10px;
+  }
+
+  /* API Key */
+  .api-row { display: flex; gap: 10px; align-items: center; }
+  .api-row input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    background: var(--marfim);
+    color: var(--tinta);
+  }
+  .api-row input:focus { outline: none; border-color: var(--vinho-light); }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .btn-primary { background: var(--vinho); color: var(--marfim); }
+  .btn-primary:hover { background: var(--vinho-deep); }
+  .btn-primary:disabled { background: var(--warm); cursor: not-allowed; }
+  .btn-secondary { background: var(--blush); color: var(--vinho-deep); border: 1px solid var(--warm); }
+  .btn-secondary:hover { background: var(--warm); }
+  .btn-accent { background: var(--cobre); color: white; }
+  .btn-accent:hover { background: #a87840; }
+  .btn-danger-outline { background: white; color: var(--danger); border: 1px solid #dca0a4; }
+  .btn-danger-outline:hover { background: #fdf0f0; }
+
+  /* Patient */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 400;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--moka);
+  }
+  .form-group input, .form-group select {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 300;
+    background: var(--marfim);
+    color: var(--tinta);
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--vinho-light); background: white; }
+
+  /* Upload */
+  .upload-area {
+    border: 1.5px dashed var(--warm);
+    border-radius: var(--radius);
+    padding: 36px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--creme);
+  }
+  .upload-area:hover, .upload-area.drag-over {
+    border-color: var(--vinho-light);
+    background: var(--blush);
+  }
+  .upload-area .icon { font-size: 2.4rem; margin-bottom: 10px; }
+  .upload-area p { font-size: 0.85rem; color: var(--moka); }
+  .upload-area strong { color: var(--vinho); font-weight: 400; }
+  #fileInput { display: none; }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    aspect-ratio: 4/3;
+  }
+  .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+  .preview-item .remove-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(106,31,48,0.7);
+    color: white; border: none; border-radius: 50%;
+    width: 22px; height: 22px; cursor: pointer;
+    font-size: 13px; display: flex; align-items: center; justify-content: center;
+  }
+  .preview-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(106,31,48,0.75);
+    color: var(--marfim);
+    font-size: 0.62rem; padding: 3px 5px; text-align: center; letter-spacing: 0.05em;
+  }
+
+  /* Manual values */
+  .exam-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .exam-table th {
+    background: var(--blush);
+    padding: 9px 12px;
+    text-align: left;
+    font-family: 'Josefin Sans', sans-serif;
+    font-weight: 400;
+    color: var(--moka);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+  }
+  .exam-table td { padding: 8px 12px; border-bottom: 1px solid var(--blush); }
+  .exam-table input {
+    width: 100%; border: 1px solid var(--border); border-radius: 5px;
+    padding: 6px 8px; font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.85rem; background: var(--marfim);
+  }
+  .exam-table input:focus { outline: none; border-color: var(--vinho-light); }
+  .exam-table .unit { color: var(--moka); font-size: 0.75rem; }
+  .exam-table .ref { color: var(--moka); font-size: 0.72rem; }
+
+  /* Actions */
+  .action-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+  /* Result */
+  #resultSection { display: none; }
+
+  .verdict-banner {
+    border-radius: var(--radius);
+    padding: 22px 28px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .verdict-banner.apto    { background: #ecf5f0; border: 1px solid #a8d5b8; border-left: 5px solid var(--success); }
+  .verdict-banner.atencao { background: #fdf5e7; border: 1px solid #e8c98a; border-left: 5px solid var(--warning); }
+  .verdict-banner.inapto  { background: #fdf0f0; border: 1px solid #e8b4b8; border-left: 5px solid var(--danger); }
+
+  .verdict-icon { font-size: 2.2rem; }
+  .verdict-text h2 {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+  }
+  .verdict-text p { font-size: 0.83rem; margin-top: 4px; opacity: 0.8; }
+  .verdict-banner.apto    .verdict-text h2 { color: var(--success); }
+  .verdict-banner.atencao .verdict-text h2 { color: var(--warning); }
+  .verdict-banner.inapto  .verdict-text h2 { color: var(--danger); }
+
+  .exam-result-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .exam-result-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 16px;
+    background: var(--blush);
+    border-bottom: 1px solid var(--border);
+  }
+  .exam-result-header .exam-name {
+    font-family: 'Cormorant SC', serif;
+    font-weight: 400;
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    color: var(--vinho-deep);
+  }
+  .status-badge {
+    padding: 3px 11px; border-radius: 12px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.62rem; font-weight: 400;
+    text-transform: uppercase; letter-spacing: 0.18em;
+  }
+  .badge-normal  { background: #e2f0e8; color: var(--success); }
+  .badge-atencao { background: #fdf0d8; color: var(--warning); }
+  .badge-alterado{ background: #fde8e8; color: var(--danger); }
+  .badge-ausente { background: var(--blush); color: var(--moka); }
+
+  .exam-result-body { padding: 14px 16px; background: white; }
+  .exam-values-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px; margin-bottom: 10px;
+  }
+  .value-item .vl {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1.1rem; font-weight: 400; letter-spacing: 0.05em;
+  }
+  .value-item .vl.alt  { color: var(--danger); }
+  .value-item .vl.warn { color: var(--warning); }
+  .value-item .vl.ok   { color: var(--success); }
+  .value-item .vl.nd   { color: var(--warm); }
+  .value-item .vn {
+    font-size: 0.65rem; color: var(--moka); margin-top: 2px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .exam-comment {
+    font-size: 0.83rem; color: var(--tinta);
+    background: var(--marfim);
+    border-left: 3px solid var(--warm);
+    padding: 9px 13px; border-radius: 0 6px 6px 0;
+    margin-top: 8px; line-height: 1.6;
+  }
+  .exam-comment.alt  { border-left-color: var(--danger); }
+  .exam-comment.warn { border-left-color: var(--warning); }
+  .exam-comment.ok   { border-left-color: var(--success); }
+
+  .recommendation-box {
+    background: var(--creme);
+    border: 1px solid var(--warm);
+    border-radius: 8px;
+    padding: 18px 20px; margin-top: 4px;
+    font-size: 0.875rem; line-height: 1.65;
+  }
+  .recommendation-box h3 {
+    font-family: 'Cormorant SC', serif;
+    font-size: 0.78rem; font-weight: 400;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--vinho); margin-bottom: 10px;
+  }
+
+  .disclaimer {
+    font-size: 0.72rem; color: var(--moka);
+    background: var(--blush); border: 1px solid var(--warm);
+    border-radius: 6px; padding: 10px 14px; margin-top: 20px; line-height: 1.55;
+  }
+
+  /* Loading */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(253,249,244,0.92);
+    z-index: 100; flex-direction: column;
+    align-items: center; justify-content: center; gap: 18px;
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 3px solid var(--warm);
+    border-top-color: var(--vinho);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-msg {
+    font-family: 'Cormorant SC', serif;
+    font-size: 1rem; font-weight: 400; letter-spacing: 0.18em; color: var(--vinho);
+  }
+  .loading-sub { font-size: 0.75rem; color: var(--moka); letter-spacing: 0.06em; }
+
+  /* Tabs */
+  .tab-row { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab-btn {
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    border-radius: 6px 6px 0 0;
+    background: var(--blush);
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.68rem; font-weight: 400;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    cursor: pointer; color: var(--moka); border-bottom: none; transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: white; color: var(--vinho);
+    border-color: var(--border); border-bottom: 2px solid white; margin-bottom: -1px;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .tab-border { border-top: 1px solid var(--border); padding-top: 18px; }
+
+  /* Print */
+  .print-header { display: none; }
+  @media print {
+    header, .card:first-child, .action-row, .upload-area, .preview-grid,
+    .tab-row, #inputSection, .btn { display: none !important; }
+    .print-header { display: block; text-align: center; margin-bottom: 20px; }
+    .print-header h2 { color: var(--vinho); font-family: 'Cormorant SC', serif; }
+    body { background: white; }
+    .container { padding: 0; max-width: 100%; }
+    #resultSection { display: block !important; }
+  }
+
+  .tag-extracted {
+    display: inline-block; background: #fdeef2; color: var(--vinho-light);
+    border-radius: 4px; font-size: 0.65rem; padding: 1px 6px; margin-left: 6px; font-weight: 400;
+  }
+
+  .api-status {
+    font-size: 0.75rem; padding: 4px 10px; border-radius: 5px;
+    display: inline-block; letter-spacing: 0.06em;
+  }
+  .api-status.ok  { background: #e2f0e8; color: var(--success); }
+  .api-status.err { background: #fde8e8; color: var(--danger); }
+
+  .info-tip {
+    font-size: 0.75rem; color: var(--moka); margin-top: 6px; line-height: 1.5;
+  }
+
+  .field-auto-filled {
+    border-color: var(--vinho-light) !important;
+    background: #fdf4f6 !important;
+  }
+
+  .extracted-badge {
+    display: inline-block; background: #fdeef2; color: var(--vinho-light);
+    border-radius: 4px; font-size: 0.65rem; padding: 1px 6px; margin-left: 6px;
+    font-weight: 400; vertical-align: middle;
+  }
+
+  .extract-notice {
+    background: #ecf5f0; border: 1px solid #a8d5b8;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.78rem; color: var(--success); margin-top: 14px; display: none;
+  }
+
+  /* ========== HISTÓRICO ========== */
+  .page-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--warm);
+  }
+  .page-tab {
+    padding: 10px 24px;
+    border: none;
+    background: none;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--moka);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.18s;
+  }
+  .page-tab.active {
+    color: var(--vinho);
+    border-bottom-color: var(--vinho);
+  }
+  .page-tab:hover:not(.active) { color: var(--tinta); }
+
+  #pageHistorico { display: none; }
+  #pageAvaliacao { display: block; }
+
+  .hist-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  .hist-empty .hist-icon { font-size: 2.8rem; margin-bottom: 10px; }
+
+  .hist-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .hist-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: white;
+    transition: box-shadow 0.15s;
+  }
+  .hist-item:hover { box-shadow: var(--shadow); }
+
+  .hist-verdict {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .hist-verdict.apto { background: #ecf5f0; }
+  .hist-verdict.atencao { background: #fdf5e7; }
+  .hist-verdict.inapto { background: #fdf0f0; }
+  .hist-verdict.rascunho { background: var(--blush); }
+
+  .hist-info { flex: 1; min-width: 0; }
+  .hist-info .hist-name { font-weight: 700; font-size: 0.93rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hist-info .hist-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+  .hist-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .btn-xs { padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+
+  .autosave-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--success);
+    background: #ecf5f0;
+    border-radius: 5px;
+    padding: 3px 8px;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .autosave-badge.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-accent"></div>
+  <div class="header-inner">
+    <div class="logo">🦷</div>
+    <div>
+      <h1>Avaliador Pré-Cirúrgico</h1>
+      <p>Athena — Análise Laboratorial Cirúrgica</p>
+    </div>
+  </div>
+</header>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loadingMsg">Analisando exames com IA...</div>
+  <div class="loading-sub" id="loadingSub">Extraindo valores e avaliando critérios cirúrgicos</div>
+</div>
+
+<div class="container">
+
+  <!-- Page tabs -->
+  <div class="page-tabs">
+    <button class="page-tab active" onclick="showPage('avaliacao')" id="ptAvaliacao">🔍 Nova Avaliação</button>
+    <button class="page-tab" onclick="showPage('historico')" id="ptHistorico">📂 Histórico</button>
+    <span id="autosaveBadge" class="autosave-badge" style="margin-left:auto;margin-bottom:2px;">✓ Salvo</span>
+  </div>
+
+  <!-- ===== PÁGINA AVALIAÇÃO ===== -->
+  <div id="pageAvaliacao">
+
+  <!-- API Key -->
+  <div class="card">
+    <div class="card-title">🔑 Configuração da API OpenRouter</div>
+    <div class="api-row">
+      <input type="password" id="apiKeyInput" placeholder="Cole sua chave do OpenRouter (sk-or-...)" autocomplete="off">
+      <button class="btn btn-secondary" onclick="saveApiKey()">Salvar</button>
+      <button class="btn btn-danger-outline" onclick="clearApiKey()" style="padding:9px 12px;">✕</button>
+    </div>
+    <div id="apiStatus" class="info-tip">Chave não configurada. A chave é salva localmente no navegador.</div>
+    <p class="info-tip" style="margin-top:8px;">⚠️ A chave fica armazenada apenas neste navegador. Obtenha sua chave gratuita em <strong>openrouter.ai</strong> → API Keys.</p>
+  </div>
+
+  <!-- Patient Data -->
+  <div class="card" id="inputSection">
+    <div class="card-title">👤 Dados do Paciente</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="patientName" placeholder="Nome do paciente">
+      </div>
+      <div class="form-group">
+        <label>Data de nascimento</label>
+        <input type="date" id="patientDob">
+      </div>
+      <div class="form-group">
+        <label>Cirurgião responsável</label>
+        <select id="surgeon">
+          <option value="">Selecionar...</option>
+          <option>Dr. Aurélio</option>
+          <option>Dr. Scharles</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Procedimento previsto</label>
+        <input type="text" id="procedure" placeholder="Ex: Extração do 38, implante...">
+      </div>
+      <div class="form-group">
+        <label>Data dos exames</label>
+        <input type="date" id="examDate">
+      </div>
+      <div class="form-group">
+        <label>Comorbidades relevantes</label>
+        <input type="text" id="comorbidities" placeholder="Ex: DM tipo 2, HAS, anticoagulante...">
+      </div>
+    </div>
+    <div class="extract-notice" id="extractNotice">✅ Dados do paciente preenchidos automaticamente a partir do laudo. Confira e corrija se necessário.</div>
+  </div>
+
+  <!-- Input method tabs -->
+  <div class="card">
+    <div class="card-title">🔬 Resultados dos Exames</div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('upload')">📷 Enviar Foto do Laudo</button>
+      <button class="tab-btn" onclick="switchTab('manual')">✏️ Inserir Manualmente</button>
+    </div>
+
+    <!-- Upload tab -->
+    <div id="tab-upload" class="tab-panel active tab-border">
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="icon">📋</div>
+        <p><strong>Clique aqui</strong> ou arraste as fotos dos laudos</p>
+        <p style="margin-top:6px; font-size:0.8rem;">JPG, PNG, PDF (imagem) • Múltiplos arquivos aceitos</p>
+      </div>
+      <input type="file" id="fileInput" multiple accept="image/*,application/pdf" onchange="handleFileSelect(event)">
+      <div class="preview-grid" id="previewGrid"></div>
+      <p class="info-tip" style="margin-top:12px;">💡 A IA irá extrair automaticamente os valores dos exames <strong>e os dados do paciente</strong> (nome, data de nascimento e data dos exames) das imagens enviadas.</p>
+    </div>
+
+    <!-- Manual tab -->
+    <div id="tab-manual" class="tab-panel tab-border">
+      <table class="exam-table">
+        <thead>
+          <tr>
+            <th>Exame</th>
+            <th>Valor encontrado</th>
+            <th>Unidade</th>
+            <th>Referência do Lab.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Hemoglobina</strong></td>
+            <td><input type="number" step="0.1" id="v_hb" placeholder="ex: 13.5"></td>
+            <td class="unit">g/dL</td>
+            <td class="ref">H: 13,5–17,5 | M: 12,0–16,0</td>
+          </tr>
+          <tr>
+            <td><strong>Leucócitos totais</strong></td>
+            <td><input type="number" step="100" id="v_leuco" placeholder="ex: 7500"></td>
+            <td class="unit">/mm³</td>
+            <td class="ref">4.000–11.000</td>
+          </tr>
+          <tr>
+            <td><strong>Plaquetas</strong></td>
+            <td><input type="number" step="1000" id="v_plaq" placeholder="ex: 200000"></td>
+            <td class="unit">/mm³</td>
+            <td class="ref">150.000–400.000</td>
+          </tr>
+          <tr>
+            <td><strong>INR</strong></td>
+            <td><input type="number" step="0.01" id="v_inr" placeholder="ex: 1.2"></td>
+            <td class="unit">—</td>
+            <td class="ref">0,8–1,2 (terapêutico: &lt;3,5)</td>
+          </tr>
+          <tr>
+            <td><strong>Glicose em jejum</strong></td>
+            <td><input type="number" step="1" id="v_glic" placeholder="ex: 92"></td>
+            <td class="unit">mg/dL</td>
+            <td class="ref">&lt;100 (normal)</td>
+          </tr>
+          <tr>
+            <td><strong>Hemoglobina Glicada (HbA1c)</strong></td>
+            <td><input type="number" step="0.1" id="v_hba1c" placeholder="ex: 6.2"></td>
+            <td class="unit">%</td>
+            <td class="ref">&lt;5,7% (normal); &lt;7% (DM controlado)</td>
+          </tr>
+          <tr>
+            <td><strong>Creatinina</strong></td>
+            <td><input type="number" step="0.01" id="v_creat" placeholder="ex: 0.95"></td>
+            <td class="unit">mg/dL</td>
+            <td class="ref">H: 0,7–1,2 | M: 0,5–1,0</td>
+          </tr>
+          <tr>
+            <td><strong>TGO (AST)</strong></td>
+            <td><input type="number" step="1" id="v_tgo" placeholder="ex: 28"></td>
+            <td class="unit">U/L</td>
+            <td class="ref">&lt;40 U/L</td>
+          </tr>
+          <tr>
+            <td><strong>TGP (ALT)</strong></td>
+            <td><input type="number" step="1" id="v_tgp" placeholder="ex: 25"></td>
+            <td class="unit">U/L</td>
+            <td class="ref">H: &lt;41 | M: &lt;31</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="info-tip" style="margin-top:12px;">Deixe em branco os exames não realizados.</p>
+    </div>
+  </div>
+
+  <!-- Action -->
+  <div class="action-row">
+    <button class="btn btn-primary" id="analyzeBtn" onclick="startAnalysis()" style="padding:11px 28px; font-size:1rem;">
+      🔍 Analisar Liberação Cirúrgica
+    </button>
+    <button class="btn btn-secondary" onclick="clearAll()">↺ Limpar tudo</button>
+  </div>
+
+  <!-- Result Section -->
+  <div id="resultSection">
+    <div class="print-header">
+      <h2>Oral Unic Carlos Barbosa</h2>
+      <p>Avaliação Pré-Cirúrgica — <span id="printDate"></span></p>
+    </div>
+
+    <div id="verdictBanner" class="verdict-banner">
+      <div class="verdict-icon" id="verdictIcon"></div>
+      <div class="verdict-text">
+        <h2 id="verdictTitle"></h2>
+        <p id="verdictSubtitle"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Análise Detalhada por Exame</div>
+      <div id="examResults"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Parecer Clínico e Recomendações</div>
+      <div id="clinicalRec" class="recommendation-box"></div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="btn btn-primary" onclick="savePDF()">📄 Salvar PDF</button>
+      <button class="btn btn-secondary" onclick="copyReport()">📋 Copiar parecer</button>
+    </div>
+
+    <div class="disclaimer">
+      ⚕️ <strong>Aviso Clínico:</strong> Esta avaliação é uma ferramenta de suporte à decisão clínica baseada em parâmetros da literatura odontológica e médica. Não substitui o julgamento clínico do profissional responsável. Valores isolados devem ser interpretados no contexto clínico do paciente. Em caso de dúvida, solicitar avaliação médica especializada antes do procedimento.
+    </div>
+  </div>
+
+  </div><!-- /pageAvaliacao -->
+
+  <!-- ===== PÁGINA HISTÓRICO ===== -->
+  <div id="pageHistorico">
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span>📂 Avaliações Salvas</span>
+        <button class="btn btn-danger-outline btn-xs" onclick="clearHistory()">🗑 Limpar histórico</button>
+      </div>
+      <div id="histList"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ==================== STATE ====================
+let uploadedImages = [];
+let currentTab = 'upload';
+let analysisResult = null;
+
+// ==================== API KEY ====================
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-or-')) {
+    showApiStatus('Chave inválida. Deve iniciar com sk-or-...', 'err');
+    return;
+  }
+  localStorage.setItem('ou_api_key', key);
+  document.getElementById('apiKeyInput').value = '';
+  showApiStatus('✓ Chave OpenRouter salva com sucesso', 'ok');
+}
+
+function clearApiKey() {
+  localStorage.removeItem('ou_api_key');
+  document.getElementById('apiKeyInput').value = '';
+  showApiStatus('Chave removida.', 'err');
+}
+
+function getApiKey() {
+  return localStorage.getItem('ou_api_key') || '';
+}
+
+function showApiStatus(msg, type) {
+  const el = document.getElementById('apiStatus');
+  el.className = 'api-status ' + type;
+  el.textContent = msg;
+}
+
+// Check on load
+window.addEventListener('load', () => {
+  const k = getApiKey();
+  if (k) showApiStatus('✓ Chave configurada', 'ok');
+
+  // Restore draft (may overwrite examDate, so restore first)
+  restoreDraft();
+
+  // Set today as default exam date only if nothing was restored
+  if (!document.getElementById('examDate').value) {
+    document.getElementById('examDate').value = new Date().toISOString().split('T')[0];
+  }
+
+  bindAutosave();
+});
+
+// ==================== TABS ====================
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'upload') || (i === 1 && tab === 'manual'));
+  });
+  document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+  document.getElementById('tab-manual').classList.toggle('active', tab === 'manual');
+}
+
+// ==================== FILE UPLOAD ====================
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.add('drag-over');
+}
+function handleDragLeave(e) {
+  document.getElementById('uploadArea').classList.remove('drag-over');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').classList.remove('drag-over');
+  processFiles(e.dataTransfer.files);
+}
+function handleFileSelect(e) {
+  processFiles(e.target.files);
+}
+
+function processFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (file.type.startsWith('image/')) {
+        compressImage(e.target.result, file.name, file.type);
+      } else {
+        const id = Date.now() + Math.random();
+        uploadedImages.push({ id, name: file.name, dataUrl: e.target.result, type: file.type });
+        renderPreviews();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function compressImage(dataUrl, name, type) {
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    // Limita dimensão máxima a 1600px mantendo proporção
+    const MAX = 1600;
+    let w = img.width, h = img.height;
+    if (w > MAX || h > MAX) {
+      if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    // Qualidade 0.82 — boa leitura de texto, tamanho reduzido
+    const compressed = canvas.toDataURL('image/jpeg', 0.82);
+    const id = Date.now() + Math.random();
+    uploadedImages.push({ id, name, dataUrl: compressed, type: 'image/jpeg' });
+    renderPreviews();
+  };
+  img.src = dataUrl;
+}
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = '';
+  uploadedImages.forEach(img => {
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    const isImg = img.type.startsWith('image/');
+    div.innerHTML = `
+      ${isImg ? `<img src="${img.dataUrl}" alt="${img.name}">` : `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;background:#f0f3f4;">📄</div>`}
+      <div class="preview-label">${img.name.substring(0, 20)}</div>
+      <button class="remove-btn" onclick="removeImage('${img.id}')">✕</button>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function removeImage(id) {
+  uploadedImages = uploadedImages.filter(i => i.id != id);
+  renderPreviews();
+}
+
+// ==================== ANALYSIS ====================
+async function startAnalysis() {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    alert('Configure a chave da API OpenRouter antes de analisar.');
+    document.getElementById('apiKeyInput').focus();
+    return;
+  }
+
+  let patientName = document.getElementById('patientName').value || 'Não informado';
+  const surgeon = document.getElementById('surgeon').value || 'Não informado';
+  const procedure = document.getElementById('procedure').value || 'Não informado';
+  const comorbidities = document.getElementById('comorbidities').value || 'Nenhuma registrada';
+  let examDate = document.getElementById('examDate').value || '';
+  const dob = document.getElementById('patientDob').value;
+  let age = dob ? calcAge(dob) : null;
+
+  showLoading(true, 'Processando imagens e exames...', 'Aguarde enquanto a IA extrai e avalia os valores');
+
+  try {
+    let content = [];
+
+    if (currentTab === 'upload') {
+      if (uploadedImages.length === 0) {
+        showLoading(false);
+        alert('Envie pelo menos uma foto do laudo.');
+        return;
+      }
+
+      // Add images in Gemini format
+      for (const img of uploadedImages) {
+        if (img.type.startsWith('image/')) {
+          const base64 = img.dataUrl.split(',')[1];
+          content.push({
+            inlineData: { mimeType: img.type, data: base64 }
+          });
+        }
+      }
+
+      content.push({
+        text: buildPromptFromImages(patientName, age, surgeon, procedure, comorbidities, examDate)
+      });
+
+    } else {
+      // Manual values
+      const vals = getManualValues();
+      content.push({
+        text: buildPromptFromManual(patientName, age, surgeon, procedure, comorbidities, examDate, vals)
+      });
+    }
+
+    const response = await callGemini(apiKey, content);
+    const parsed = parseResponse(response);
+    analysisResult = parsed;
+
+    // Auto-fill patient fields from extracted data
+    if (parsed.pacienteExtraido) {
+      const pe = parsed.pacienteExtraido;
+      let filled = false;
+      const nameEl = document.getElementById('patientName');
+      const dobEl = document.getElementById('patientDob');
+      const examDateEl = document.getElementById('examDate');
+
+      if (pe.nome && (!nameEl.value || nameEl.value === 'Não informado')) {
+        nameEl.value = pe.nome;
+        nameEl.classList.add('field-auto-filled');
+        filled = true;
+      }
+      if (pe.dataNascimento && !dobEl.value) {
+        dobEl.value = pe.dataNascimento;
+        dobEl.classList.add('field-auto-filled');
+        filled = true;
+      }
+      if (pe.dataExames && !examDateEl.value) {
+        examDateEl.value = pe.dataExames;
+        examDateEl.classList.add('field-auto-filled');
+        filled = true;
+      }
+
+      if (filled) document.getElementById('extractNotice').style.display = 'block';
+
+      // Refresh local vars after fill
+      patientName = nameEl.value || patientName;
+      examDate = examDateEl.value || examDate;
+      const dobVal = dobEl.value;
+      if (dobVal) age = calcAge(dobVal);
+    }
+
+    renderResult(parsed, patientName, age, surgeon, procedure, examDate);
+    saveToHistory(parsed, {
+      patientName, surgeon, procedure, examDate,
+      patientDob: document.getElementById('patientDob').value,
+      comorbidities: document.getElementById('comorbidities').value,
+      manualValues: getManualValuesRaw()
+    });
+    showLoading(false);
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    showLoading(false);
+    console.error(err);
+    alert('Erro ao analisar: ' + (err.message || 'Verifique a chave da API e tente novamente.'));
+  }
+}
+
+function calcAge(dob) {
+  const d = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - d.getFullYear();
+  const m = today.getMonth() - d.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < d.getDate())) age--;
+  return age;
+}
+
+function getManualValues() {
+  const ids = ['hb','leuco','plaq','inr','glic','hba1c','creat','tgo','tgp'];
+  const labels = ['Hemoglobina','Leucócitos','Plaquetas','INR','Glicose em jejum','HbA1c','Creatinina','TGO','TGP'];
+  const units = ['g/dL','/mm³','/mm³','—','mg/dL','%','mg/dL','U/L','U/L'];
+  let result = {};
+  ids.forEach((id, i) => {
+    const val = document.getElementById('v_' + id).value;
+    if (val !== '') result[labels[i]] = { value: parseFloat(val), unit: units[i] };
+  });
+  return result;
+}
+
+function buildPromptFromImages(name, age, surgeon, proc, comorbid, examDate) {
+  return `Você é um assistente clínico especializado em odontologia cirúrgica.
+
+Analise as imagens de laudos laboratoriais e faça duas tarefas:
+
+TAREFA 1 — Extraia os dados do paciente visíveis no laudo:
+- Nome completo do paciente
+- Data de nascimento (formato YYYY-MM-DD)
+- Data de coleta/emissão dos exames (formato YYYY-MM-DD)
+
+TAREFA 2 — Extraia os valores dos exames:
+- Hemograma completo: Hemoglobina, Leucócitos totais, Plaquetas
+- INR (RNI)
+- Glicose em jejum
+- Hemoglobina Glicada (HbA1c)
+- Creatinina
+- TGO (AST)
+- TGP (ALT)
+
+DADOS JÁ INFORMADOS (use se não encontrar no laudo):
+- Nome: ${name}
+- Cirurgião: ${surgeon}
+- Procedimento: ${proc}
+- Comorbidades: ${comorbid}
+- Data dos exames informada: ${examDate}
+
+Com base nos valores extraídos, avalie a LIBERAÇÃO CIRÚRGICA ODONTOLÓGICA usando os critérios da literatura atual (ADA, ASA, consensos de cirurgia oral). Para cada exame avalie:
+- Valor encontrado (extraído da imagem)
+- Status: NORMAL / ATENÇÃO / ALTERADO / NÃO ENCONTRADO
+- Justificativa clínica com referência ao critério usado
+
+${JSON_FORMAT_INSTRUCTIONS}`;
+}
+
+function buildPromptFromManual(name, age, surgeon, proc, comorbid, examDate, vals) {
+  let valStr = Object.entries(vals).map(([k, v]) => `- ${k}: ${v.value} ${v.unit}`).join('\n');
+  if (!valStr) valStr = 'Nenhum valor informado';
+
+  return `Você é um assistente clínico especializado em odontologia cirúrgica.
+
+Avalie a LIBERAÇÃO CIRÚRGICA ODONTOLÓGICA para o seguinte paciente com base nos valores laboratoriais informados:
+
+DADOS DO PACIENTE:
+- Nome: ${name}
+- Idade: ${age !== null ? age + ' anos' : 'não informada'}
+- Cirurgião: ${surgeon}
+- Procedimento: ${proc}
+- Comorbidades: ${comorbid}
+- Data dos exames: ${examDate}
+
+VALORES LABORATORIAIS:
+${valStr}
+
+Para cada exame presente, avalie:
+- Status: NORMAL / ATENÇÃO / ALTERADO
+- Justificativa clínica com referência ao critério usado (literatura atual)
+
+${JSON_FORMAT_INSTRUCTIONS}`;
+}
+
+const JSON_FORMAT_INSTRUCTIONS = `
+Responda EXCLUSIVAMENTE em JSON válido com esta estrutura (sem markdown, sem texto fora do JSON):
+{
+  "pacienteExtraido": {
+    "nome": "Nome extraído do laudo ou null",
+    "dataNascimento": "YYYY-MM-DD extraído do laudo ou null",
+    "dataExames": "YYYY-MM-DD extraído do laudo ou null"
+  },
+  "verdict": "APTO" | "ATENÇÃO" | "INAPTO",
+  "verdictSummary": "Frase curta resumindo o parecer geral",
+  "exames": [
+    {
+      "nome": "Nome do exame",
+      "valores": [
+        { "parametro": "Nome do parâmetro", "valor": "valor com unidade ou N/D", "status": "normal|atencao|alterado|ausente" }
+      ],
+      "statusGeral": "normal|atencao|alterado|ausente",
+      "comentario": "Análise clínica do exame, critérios usados, referência. Se alterado, explique o risco e conduta."
+    }
+  ],
+  "recomendacoes": "Texto completo com parecer clínico consolidado, conduta recomendada, e se necessário encaminhamento médico. Inclua referências aos critérios usados.",
+  "examesAusentes": ["lista de exames não encontrados/informados"]
+}`;
+
+async function callGemini(apiKey, parts) {
+  // Converte parts do formato Gemini para OpenRouter (OpenAI-compatible)
+  const messages = buildOpenRouterMessages(parts);
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://oralunic.com.br',
+      'X-Title': 'Avaliador Cirúrgico Oral Unic'
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.0-flash-lite-001',
+      messages,
+      temperature: 0.2,
+      max_tokens: 4096,
+      response_format: { type: 'json_object' }
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Resposta vazia da API.');
+  return text;
+}
+
+function buildOpenRouterMessages(parts) {
+  // parts pode ter { text } e { inlineData: { mimeType, data } }
+  const content = [];
+  for (const part of parts) {
+    if (part.text) {
+      content.push({ type: 'text', text: part.text });
+    } else if (part.inlineData) {
+      content.push({
+        type: 'image_url',
+        image_url: { url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}` }
+      });
+    }
+  }
+  return [{ role: 'user', content }];
+}
+
+function parseResponse(text) {
+  // Remove markdown code fences if present
+  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch(e) {
+    // Try to extract JSON from text
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+    throw new Error('Não foi possível interpretar a resposta da IA.');
+  }
+}
+
+// ==================== RENDER RESULT ====================
+function renderResult(data, name, age, surgeon, proc, examDate) {
+  const today = new Date().toLocaleDateString('pt-BR');
+  document.getElementById('printDate').textContent = today;
+
+  // Verdict
+  const banner = document.getElementById('verdictBanner');
+  const icons = { 'APTO': '✅', 'ATENÇÃO': '⚠️', 'INAPTO': '🚫' };
+  const classes = { 'APTO': 'apto', 'ATENÇÃO': 'atencao', 'INAPTO': 'inapto' };
+  const verdict = data.verdict || 'ATENÇÃO';
+  banner.className = 'verdict-banner ' + (classes[verdict] || 'atencao');
+  document.getElementById('verdictIcon').textContent = icons[verdict] || '⚠️';
+  document.getElementById('verdictTitle').textContent = verdict + ' PARA CIRURGIA';
+  document.getElementById('verdictSubtitle').textContent = data.verdictSummary || '';
+
+  // Patient info in banner subtitle
+  const patInfo = [name !== 'Não informado' ? name : null, age ? age + ' anos' : null, surgeon !== 'Não informado' ? 'Cirurgião: ' + surgeon : null, proc !== 'Não informado' ? proc : null].filter(Boolean).join(' • ');
+  if (patInfo) {
+    document.getElementById('verdictSubtitle').textContent = (data.verdictSummary || '') + '\n' + patInfo;
+  }
+
+  // Exams
+  const container = document.getElementById('examResults');
+  container.innerHTML = '';
+  (data.exames || []).forEach(exam => {
+    const statusClass = { normal: 'badge-normal', atencao: 'badge-atencao', alterado: 'badge-alterado', ausente: 'badge-ausente' };
+    const statusLabel = { normal: 'Normal', atencao: 'Atenção', alterado: 'Alterado', ausente: 'Não encontrado' };
+    const sg = exam.statusGeral || 'ausente';
+
+    const commentClass = { normal: 'ok', atencao: 'warn', alterado: 'alt', ausente: '' }[sg] || '';
+
+    const valuesHtml = (exam.valores || []).map(v => {
+      const vc = { normal: 'ok', atencao: 'warn', alterado: 'alt', ausente: 'nd' }[v.status] || 'nd';
+      return `<div class="value-item">
+        <div class="vl ${vc}">${v.valor || 'N/D'}</div>
+        <div class="vn">${v.parametro}</div>
+      </div>`;
+    }).join('');
+
+    container.innerHTML += `
+      <div class="exam-result-card">
+        <div class="exam-result-header">
+          <span class="exam-name">${exam.nome}</span>
+          <span class="status-badge ${statusClass[sg] || 'badge-ausente'}">${statusLabel[sg] || 'N/D'}</span>
+        </div>
+        <div class="exam-result-body">
+          ${valuesHtml ? `<div class="exam-values-row">${valuesHtml}</div>` : ''}
+          ${exam.comentario ? `<div class="exam-comment ${commentClass}">${exam.comentario}</div>` : ''}
+        </div>
+      </div>`;
+  });
+
+  // Absent exams
+  if (data.examesAusentes && data.examesAusentes.length > 0) {
+    container.innerHTML += `<div class="exam-result-card">
+      <div class="exam-result-header">
+        <span class="exam-name">Exames não encontrados</span>
+        <span class="status-badge badge-ausente">Ausentes</span>
+      </div>
+      <div class="exam-result-body">
+        <div class="exam-comment">${data.examesAusentes.join(', ')}</div>
+      </div>
+    </div>`;
+  }
+
+  // Recommendations
+  document.getElementById('clinicalRec').innerHTML = `
+    <h3>📌 Parecer e Conduta Recomendada</h3>
+    <div>${(data.recomendacoes || '').replace(/\n/g, '<br>')}</div>
+    <div style="margin-top:12px; font-size:0.78rem; color:var(--text-muted);">
+      Avaliação realizada em ${today} | Exames de ${examDate || 'data não informada'}
+    </div>
+  `;
+}
+
+// ==================== COPY REPORT ====================
+function copyReport() {
+  if (!analysisResult) return;
+  const data = analysisResult;
+  let text = `AVALIAÇÃO PRÉ-CIRÚRGICA ODONTOLÓGICA — ORAL UNIC CARLOS BARBOSA\n`;
+  text += `Data: ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+  text += `RESULTADO: ${data.verdict}\n${data.verdictSummary}\n\n`;
+  text += `EXAMES:\n`;
+  (data.exames || []).forEach(e => {
+    text += `\n${e.nome.toUpperCase()}: ${e.statusGeral?.toUpperCase()}\n`;
+    (e.valores || []).forEach(v => text += `  ${v.parametro}: ${v.valor}\n`);
+    if (e.comentario) text += `  → ${e.comentario}\n`;
+  });
+  text += `\nPARECER CLÍNICO:\n${data.recomendacoes}\n`;
+  navigator.clipboard.writeText(text).then(() => alert('Parecer copiado para a área de transferência!')).catch(() => alert('Não foi possível copiar. Use o botão imprimir.'));
+}
+
+// ==================== CLEAR ====================
+function clearAll() {
+  uploadedImages = [];
+  renderPreviews();
+  document.getElementById('previewGrid').innerHTML = '';
+  document.querySelectorAll('.exam-table input').forEach(i => i.value = '');
+  document.getElementById('patientName').value = '';
+  document.getElementById('patientDob').value = '';
+  document.getElementById('surgeon').value = '';
+  document.getElementById('procedure').value = '';
+  document.getElementById('comorbidities').value = '';
+  document.getElementById('resultSection').style.display = 'none';
+  document.getElementById('extractNotice').style.display = 'none';
+  document.querySelectorAll('.field-auto-filled').forEach(el => el.classList.remove('field-auto-filled'));
+  analysisResult = null;
+  localStorage.removeItem(DRAFT_KEY);
+  window.scrollTo(0, 0);
+}
+
+// ==================== PDF ====================
+function savePDF() {
+  if (!analysisResult) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const data = analysisResult;
+  const pageW = 210;
+  const margin = 14;
+  const usable = pageW - margin * 2;
+  let y = 14;
+
+  const addLine = (text, opts = {}) => {
+    const { size = 10, bold = false, color = [30,30,30], indent = 0, lineH = 6 } = opts;
+    doc.setFontSize(size);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setTextColor(...color);
+    const lines = doc.splitTextToSize(text, usable - indent);
+    lines.forEach(line => {
+      if (y > 275) { doc.addPage(); y = 14; }
+      doc.text(line, margin + indent, y);
+      y += lineH;
+    });
+  };
+
+  const addRect = (fillColor, h = 8) => {
+    doc.setFillColor(...fillColor);
+    doc.rect(margin, y - 5.5, usable, h, 'F');
+  };
+
+  // Header
+  doc.setFillColor(26, 82, 118);
+  doc.rect(0, 0, 210, 22, 'F');
+  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('Avaliação Pré-Cirúrgica Odontológica', margin, 10);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Oral Unic Carlos Barbosa', margin, 16);
+  const dateStr = new Date().toLocaleDateString('pt-BR');
+  doc.text('Emitido em: ' + dateStr, pageW - margin, 16, { align: 'right' });
+  y = 30;
+
+  // Patient info
+  const name = document.getElementById('patientName').value || '—';
+  const dob = document.getElementById('patientDob').value;
+  const dobFmt = dob ? new Date(dob + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  const surgeon = document.getElementById('surgeon').value || '—';
+  const procedure = document.getElementById('procedure').value || '—';
+  const examDate = document.getElementById('examDate').value;
+  const examDateFmt = examDate ? new Date(examDate + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  const comorbid = document.getElementById('comorbidities').value || '—';
+
+  addLine('DADOS DO PACIENTE', { size: 9, bold: true, color: [26,82,118] });
+  y += 1;
+  const patFields = [
+    ['Paciente', name], ['Nascimento', dobFmt], ['Cirurgião', surgeon],
+    ['Procedimento', procedure], ['Data dos exames', examDateFmt], ['Comorbidades', comorbid]
+  ];
+  patFields.forEach(([label, val]) => {
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
+    doc.text(label + ':', margin, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+    doc.text(val, margin + 32, y);
+    y += 5.5;
+  });
+  y += 4;
+
+  // Verdict
+  const verdictColors = { 'APTO': [30,132,73], 'ATENÇÃO': [214,137,16], 'INAPTO': [192,57,43] };
+  const vColor = verdictColors[data.verdict] || [80,80,80];
+  doc.setFillColor(...vColor);
+  doc.rect(margin, y - 1, usable, 12, 'F');
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  const icons = { 'APTO': '✓', 'ATENÇÃO': '!', 'INAPTO': '✗' };
+  doc.text((icons[data.verdict] || '') + '  ' + (data.verdict || '') + ' PARA CIRURGIA', margin + 4, y + 7);
+  y += 18;
+  if (data.verdictSummary) {
+    addLine(data.verdictSummary, { size: 9, color: [60,60,60] });
+    y += 2;
+  }
+
+  // Exams
+  addLine('ANÁLISE DOS EXAMES', { size: 10, bold: true, color: [26,82,118] });
+  y += 2;
+
+  const statusColors = { normal: [30,132,73], atencao: [214,137,16], alterado: [192,57,43], ausente: [120,120,120] };
+  const statusLabels = { normal: 'NORMAL', atencao: 'ATENÇÃO', alterado: 'ALTERADO', ausente: 'NÃO ENCONTRADO' };
+
+  (data.exames || []).forEach(exam => {
+    if (y > 260) { doc.addPage(); y = 14; }
+    const sc = statusColors[exam.statusGeral] || [120,120,120];
+    // Exam header bar
+    doc.setFillColor(240, 243, 246);
+    doc.rect(margin, y - 4, usable, 8, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text(exam.nome || '', margin + 2, y + 1);
+    const badge = statusLabels[exam.statusGeral] || '';
+    doc.setFillColor(...sc);
+    const badgeW = badge.length * 1.8 + 4;
+    doc.rect(pageW - margin - badgeW, y - 3, badgeW, 6, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+    doc.text(badge, pageW - margin - badgeW + 2, y + 1);
+    y += 8;
+
+    // Values
+    if (exam.valores && exam.valores.length) {
+      exam.valores.forEach(v => {
+        const vc = statusColors[v.status] || [80,80,80];
+        doc.setFontSize(8.5); doc.setFont('helvetica','bold'); doc.setTextColor(...vc);
+        doc.text(v.valor || 'N/D', margin + 4, y);
+        doc.setFont('helvetica','normal'); doc.setTextColor(100,100,100);
+        doc.text(v.parametro || '', margin + 28, y);
+        y += 5;
+      });
+    }
+
+    // Comment
+    if (exam.comentario) {
+      doc.setDrawColor(...statusColors[exam.statusGeral] || [180,180,180]);
+      doc.setLineWidth(0.5);
+      doc.line(margin + 2, y, margin + 2, y + 1);
+      addLine(exam.comentario, { size: 8, color: [60,60,60], indent: 4, lineH: 5 });
+    }
+    y += 4;
+  });
+
+  // Absent exams
+  if (data.examesAusentes && data.examesAusentes.length) {
+    addLine('Exames não encontrados: ' + data.examesAusentes.join(', '), { size: 8, color: [120,120,120] });
+    y += 2;
+  }
+
+  // Recommendations
+  if (y > 220) { doc.addPage(); y = 14; }
+  y += 2;
+  addLine('PARECER CLÍNICO E CONDUTA RECOMENDADA', { size: 10, bold: true, color: [26,82,118] });
+  y += 2;
+  doc.setFillColor(248,249,250);
+  const recLines = doc.splitTextToSize(data.recomendacoes || '', usable - 4);
+  const recH = recLines.length * 5 + 8;
+  if (y + recH > 280) { doc.addPage(); y = 14; }
+  doc.rect(margin, y - 2, usable, recH, 'F');
+  doc.setDrawColor(26,82,118); doc.setLineWidth(0.8);
+  doc.line(margin, y - 2, margin, y - 2 + recH);
+  addLine(data.recomendacoes || '', { size: 8.5, color: [30,30,30], indent: 4, lineH: 5 });
+  y += 6;
+
+  // Footer disclaimer
+  if (y > 260) { doc.addPage(); y = 14; }
+  doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(150,150,150);
+  const disclaimer = 'Esta avaliação é uma ferramenta de suporte à decisão clínica. Não substitui o julgamento clínico do profissional responsável.';
+  doc.text(disclaimer, margin, y, { maxWidth: usable });
+
+  // File name
+  const safeName = name.replace(/[^a-zA-Z0-9À-ÿ\s]/g, '').replace(/\s+/g, '_').substring(0, 30);
+  doc.save(`Avaliacao_Cirurgica_${safeName}_${dateStr.replace(/\//g,'-')}.pdf`);
+}
+
+// ==================== LOADING ====================
+function showLoading(show, msg, sub) {
+  document.getElementById('loadingOverlay').classList.toggle('active', show);
+  if (msg) document.getElementById('loadingMsg').textContent = msg;
+  if (sub) document.getElementById('loadingSub').textContent = sub;
+}
+
+// ==================== PAGE TABS ====================
+function showPage(page) {
+  document.getElementById('pageAvaliacao').style.display = page === 'avaliacao' ? 'block' : 'none';
+  document.getElementById('pageHistorico').style.display = page === 'historico' ? 'block' : 'none';
+  document.getElementById('ptAvaliacao').classList.toggle('active', page === 'avaliacao');
+  document.getElementById('ptHistorico').classList.toggle('active', page === 'historico');
+  if (page === 'historico') renderHistorico();
+}
+
+// ==================== AUTO-SAVE (RASCUNHO) ====================
+const DRAFT_KEY = 'ou_draft';
+const HISTORY_KEY = 'ou_history';
+
+function getDraftData() {
+  return {
+    patientName: document.getElementById('patientName').value,
+    patientDob: document.getElementById('patientDob').value,
+    surgeon: document.getElementById('surgeon').value,
+    procedure: document.getElementById('procedure').value,
+    examDate: document.getElementById('examDate').value,
+    comorbidities: document.getElementById('comorbidities').value,
+    manualValues: getManualValuesRaw(),
+    savedAt: new Date().toISOString()
+  };
+}
+
+function getManualValuesRaw() {
+  const ids = ['hb','leuco','plaq','inr','glic','hba1c','creat','tgo','tgp'];
+  const out = {};
+  ids.forEach(id => { out[id] = document.getElementById('v_' + id).value; });
+  return out;
+}
+
+function saveDraft() {
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(getDraftData()));
+  flashAutosave();
+}
+
+let autosaveTimer = null;
+function scheduleAutosave() {
+  clearTimeout(autosaveTimer);
+  autosaveTimer = setTimeout(saveDraft, 800);
+}
+
+function flashAutosave() {
+  const badge = document.getElementById('autosaveBadge');
+  badge.classList.add('visible');
+  setTimeout(() => badge.classList.remove('visible'), 2000);
+}
+
+function restoreDraft() {
+  const raw = localStorage.getItem(DRAFT_KEY);
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    if (d.patientName) document.getElementById('patientName').value = d.patientName;
+    if (d.patientDob) document.getElementById('patientDob').value = d.patientDob;
+    if (d.surgeon) document.getElementById('surgeon').value = d.surgeon;
+    if (d.procedure) document.getElementById('procedure').value = d.procedure;
+    if (d.examDate) document.getElementById('examDate').value = d.examDate;
+    if (d.comorbidities) document.getElementById('comorbidities').value = d.comorbidities;
+    if (d.manualValues) {
+      Object.entries(d.manualValues).forEach(([id, val]) => {
+        const el = document.getElementById('v_' + id);
+        if (el) el.value = val;
+      });
+    }
+  } catch(e) {}
+}
+
+function bindAutosave() {
+  const fields = ['patientName','patientDob','surgeon','procedure','examDate','comorbidities'];
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', scheduleAutosave);
+    if (el) el.addEventListener('change', scheduleAutosave);
+  });
+  const ids = ['hb','leuco','plaq','inr','glic','hba1c','creat','tgo','tgp'];
+  ids.forEach(id => {
+    const el = document.getElementById('v_' + id);
+    if (el) el.addEventListener('input', scheduleAutosave);
+  });
+}
+
+// ==================== HISTÓRICO ====================
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function saveToHistory(result, formData) {
+  const history = getHistory();
+  const entry = {
+    id: Date.now(),
+    savedAt: new Date().toISOString(),
+    patientName: formData.patientName || 'Paciente não informado',
+    surgeon: formData.surgeon || '',
+    procedure: formData.procedure || '',
+    examDate: formData.examDate || '',
+    verdict: result.verdict || 'ATENÇÃO',
+    verdictSummary: result.verdictSummary || '',
+    result: result,
+    formData: formData
+  };
+  history.unshift(entry);
+  // Manter no máximo 50 avaliações
+  if (history.length > 50) history.length = 50;
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  // Limpa rascunho após salvar avaliação completa
+  localStorage.removeItem(DRAFT_KEY);
+}
+
+function renderHistorico() {
+  const history = getHistory();
+  const container = document.getElementById('histList');
+  if (history.length === 0) {
+    container.innerHTML = `<div class="hist-empty"><div class="hist-icon">📋</div><p>Nenhuma avaliação salva ainda.<br>As avaliações aparecem aqui automaticamente após a análise.</p></div>`;
+    return;
+  }
+  const icons = { 'APTO': '✅', 'ATENÇÃO': '⚠️', 'INAPTO': '🚫' };
+  const classes = { 'APTO': 'apto', 'ATENÇÃO': 'atencao', 'INAPTO': 'inapto' };
+  container.innerHTML = `<div class="hist-list">${history.map(entry => {
+    const date = new Date(entry.savedAt).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    const vClass = classes[entry.verdict] || 'atencao';
+    const vIcon = icons[entry.verdict] || '⚠️';
+    const meta = [entry.surgeon, entry.procedure, entry.examDate ? 'Exames: ' + entry.examDate : ''].filter(Boolean).join(' · ');
+    return `<div class="hist-item">
+      <div class="hist-verdict ${vClass}">${vIcon}</div>
+      <div class="hist-info">
+        <div class="hist-name">${entry.patientName}</div>
+        <div class="hist-meta">${date}${meta ? ' · ' + meta : ''}</div>
+      </div>
+      <div class="hist-actions">
+        <button class="btn btn-secondary btn-xs" onclick="reopenEntry(${entry.id})">Abrir</button>
+        <button class="btn btn-danger-outline btn-xs" onclick="deleteEntry(${entry.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function reopenEntry(id) {
+  const history = getHistory();
+  const entry = history.find(e => e.id === id);
+  if (!entry) return;
+
+  // Preenche formulário
+  const fd = entry.formData || {};
+  document.getElementById('patientName').value = fd.patientName || '';
+  document.getElementById('patientDob').value = fd.patientDob || '';
+  document.getElementById('surgeon').value = fd.surgeon || '';
+  document.getElementById('procedure').value = fd.procedure || '';
+  document.getElementById('examDate').value = fd.examDate || '';
+  document.getElementById('comorbidities').value = fd.comorbidities || '';
+  if (fd.manualValues) {
+    Object.entries(fd.manualValues).forEach(([id, val]) => {
+      const el = document.getElementById('v_' + id);
+      if (el) el.value = val;
+    });
+  }
+
+  // Renderiza resultado
+  analysisResult = entry.result;
+  renderResult(entry.result, fd.patientName || 'Não informado', null, fd.surgeon || '', fd.procedure || '', fd.examDate || '');
+  showPage('avaliacao');
+  document.getElementById('resultSection').style.display = 'block';
+  setTimeout(() => document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' }), 100);
+}
+
+function deleteEntry(id) {
+  if (!confirm('Remover esta avaliação do histórico?')) return;
+  const history = getHistory().filter(e => e.id !== id);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  renderHistorico();
+}
+
+function clearHistory() {
+  if (!confirm('Apagar todo o histórico de avaliações? Esta ação não pode ser desfeita.')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistorico();
+}
+</script>
+</body>
+</html>
