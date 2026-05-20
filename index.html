@@ -1333,16 +1333,31 @@ function savePDF() {
     doc.rect(margin, y - 5.5, usable, h, 'F');
   };
 
-  // Header
-  doc.setFillColor(26, 82, 118);
-  doc.rect(0, 0, 210, 22, 'F');
-  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-  doc.text('Avaliação Pré-Cirúrgica Odontológica', margin, 10);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text('Oral Unic Carlos Barbosa', margin, 16);
+  // Cores da marca Oral Unic / Athena
+  const C_VINHO      = [139, 45,  66];   // #8B2D42
+  const C_VINHO_DEEP = [106, 31,  48];   // #6A1F30
+  const C_COBRE      = [196,149,  90];   // #C4955A
+  const C_MARFIM     = [253,249, 244];   // #FDF9F4
+  const C_BLUSH      = [237,221, 212];   // #EDDDD4
+  const C_MOKA       = [ 61, 42,  32];   // #3D2A20
+  const C_SUCCESS    = [ 45,106,  79];   // #2d6a4f
+  const C_WARNING    = [181,101,  13];   // #b5650d
+  const C_DANGER     = [155, 34,  38];   // #9b2226
+
+  // Header — barra vinho escuro
+  doc.setFillColor(...C_VINHO_DEEP);
+  doc.rect(0, 0, 210, 24, 'F');
+  // Faixa cobre lateral
+  doc.setFillColor(...C_COBRE);
+  doc.rect(0, 0, 5, 24, 'F');
+  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(...C_MARFIM);
+  doc.text('Avaliação Pré-Cirúrgica Odontológica', margin + 4, 11);
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(224,201,184);
+  doc.text('Athena — Análise Laboratorial Cirúrgica', margin + 4, 18);
   const dateStr = new Date().toLocaleDateString('pt-BR');
-  doc.text('Emitido em: ' + dateStr, pageW - margin, 16, { align: 'right' });
-  y = 30;
+  doc.setTextColor(224,201,184);
+  doc.text('Emitido em: ' + dateStr, pageW - margin, 18, { align: 'right' });
+  y = 34;
 
   // Patient info
   const name = document.getElementById('patientName').value || '—';
@@ -1354,23 +1369,26 @@ function savePDF() {
   const examDateFmt = examDate ? new Date(examDate + 'T12:00:00').toLocaleDateString('pt-BR') : '—';
   const comorbid = document.getElementById('comorbidities').value || '—';
 
-  addLine('DADOS DO PACIENTE', { size: 9, bold: true, color: [26,82,118] });
+  addLine('DADOS DO PACIENTE', { size: 9, bold: true, color: C_VINHO });
   y += 1;
   const patFields = [
     ['Paciente', name], ['Nascimento', dobFmt], ['Cirurgião', surgeon],
     ['Procedimento', procedure], ['Data dos exames', examDateFmt], ['Comorbidades', comorbid]
   ];
+  // Fundo suave para bloco de dados
+  doc.setFillColor(...C_BLUSH);
+  doc.rect(margin, y - 5, usable, patFields.length * 5.5 + 6, 'F');
   patFields.forEach(([label, val]) => {
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
-    doc.text(label + ':', margin, y);
-    doc.setFont('helvetica','normal'); doc.setTextColor(30,30,30);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...C_MOKA);
+    doc.text(label + ':', margin + 2, y);
+    doc.setFont('helvetica','normal'); doc.setTextColor(26,15,10);
     doc.text(val, margin + 32, y);
     y += 5.5;
   });
-  y += 4;
+  y += 6;
 
   // Verdict
-  const verdictColors = { 'APTO': [30,132,73], 'ATENÇÃO': [214,137,16], 'INAPTO': [192,57,43] };
+  const verdictColors = { 'APTO': C_SUCCESS, 'ATENÇÃO': C_WARNING, 'INAPTO': C_DANGER };
   const vColor = verdictColors[data.verdict] || [80,80,80];
   doc.setFillColor(...vColor);
   doc.rect(margin, y - 1, usable, 12, 'F');
@@ -1384,17 +1402,17 @@ function savePDF() {
   }
 
   // Exams
-  addLine('ANÁLISE DOS EXAMES', { size: 10, bold: true, color: [26,82,118] });
+  addLine('ANÁLISE DOS EXAMES', { size: 10, bold: true, color: C_VINHO });
   y += 2;
 
-  const statusColors = { normal: [30,132,73], atencao: [214,137,16], alterado: [192,57,43], ausente: [120,120,120] };
+  const statusColors = { normal: C_SUCCESS, atencao: C_WARNING, alterado: C_DANGER, ausente: [120,120,120] };
   const statusLabels = { normal: 'NORMAL', atencao: 'ATENÇÃO', alterado: 'ALTERADO', ausente: 'NÃO ENCONTRADO' };
 
   (data.exames || []).forEach(exam => {
     if (y > 260) { doc.addPage(); y = 14; }
     const sc = statusColors[exam.statusGeral] || [120,120,120];
-    // Exam header bar
-    doc.setFillColor(240, 243, 246);
+    // Exam header bar — blush da marca
+    doc.setFillColor(...C_BLUSH);
     doc.rect(margin, y - 4, usable, 8, 'F');
     doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
     doc.text(exam.nome || '', margin + 2, y + 1);
@@ -1437,14 +1455,14 @@ function savePDF() {
   // Recommendations
   if (y > 220) { doc.addPage(); y = 14; }
   y += 2;
-  addLine('PARECER CLÍNICO E CONDUTA RECOMENDADA', { size: 10, bold: true, color: [26,82,118] });
+  addLine('PARECER CLÍNICO E CONDUTA RECOMENDADA', { size: 10, bold: true, color: C_VINHO });
   y += 2;
-  doc.setFillColor(248,249,250);
+  doc.setFillColor(245,237,226); // --creme
   const recLines = doc.splitTextToSize(data.recomendacoes || '', usable - 4);
   const recH = recLines.length * 5 + 8;
   if (y + recH > 280) { doc.addPage(); y = 14; }
   doc.rect(margin, y - 2, usable, recH, 'F');
-  doc.setDrawColor(26,82,118); doc.setLineWidth(0.8);
+  doc.setDrawColor(...C_COBRE); doc.setLineWidth(1.2);
   doc.line(margin, y - 2, margin, y - 2 + recH);
   addLine(data.recomendacoes || '', { size: 8.5, color: [30,30,30], indent: 4, lineH: 5 });
   y += 6;
